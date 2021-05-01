@@ -1,36 +1,33 @@
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
-const socket = require("socket.io"); 
-
+const socket = require("socket.io");
 const PORT = 3030;
-
 const app = express();
 const server = http.createServer(app);
 
 const io = socket(server, {
-  cors: true,
-  origins:["localhost:3001"]
+    cors: true,
+    origins: ["localhost:3001"]
 });
 
 app.use(cors());
 
-io.on("connection", (socket) => {
-    console.log('new connected stocked 1')
+const users = {}
 
-    // socket.emit('message', 'welcome to chatroom')
-
-    // socket.broadcast.emit('message', 'a user has joined the chat')
-
-    // socket.on('disconnect', () => {
-    //     io.emit()
+io.on('connection', socket => {
+   
+    // socket.on('new-user', name => {
+    //     users[socket.id] = name
+    //     socket.broadcast.emit('user-connected', name)
     // })
-
-    // listen for chatmessage
-    socket.on('chatMessage', (msg) => {
-        console.log(msg)
-        io.emit('message', msg)
+    socket.on('send-chat-message', message => {
+        socket.broadcast.emit('chat-message', message)
     })
-});
+    // socket.on('disconnect', () => {
+    //     socket.broadcast.emit('user-disconnected', users[socket.id])
+    //     delete users[socket.id]
+    // })
+})
 
 server.listen(PORT, () => console.log(`listening on *:${PORT}`));
