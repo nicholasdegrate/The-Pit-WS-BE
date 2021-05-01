@@ -1,5 +1,10 @@
-dbPassword= `mongodb+srv://admin:${process.env.SECRET_KEY}@legacy-sy9ll.mongodb.net/realestate?retryWrites=true&w=majority`;
+const dotenv = require('dotenv');
+dotenv.config();
 
 module.exports = {
-    mongoURI: dbPassword
+  app_id: process.env.APP_ID,
+  key: process.env.KEY,
+  secret: process.env.SECRET,
+  cluster: process.env.CLUSTER,
+  forex_api: process.env.FOREX_API_KEY,
 };
