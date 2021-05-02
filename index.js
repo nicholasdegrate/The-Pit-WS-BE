@@ -20,26 +20,23 @@ const ws = new WebSocket('wss://socket.polygon.io/forex')
 ws.on('open', () => {
 	console.log('Connected!')
 	ws.send(`{"action":"auth","params":"${forex_api}"}`)
-	ws.send(`{"action":"subscribe","params":"C.AUD/USD,C.USD/EUR,C.USD/JPY"}`)
+	ws.send(`{"action":"subscribe","params":"C.*"}`)
 })
-
 // Per message packet:
-ws.on('message', ( data ) => {
+ws.on('ticker', ( data ) => {
 	data = JSON.parse( data )
 	data.map(( msg ) => {
 		if( msg.ev === 'status' ){
 			return console.log('Status Update:', msg.message)
-		}
-		console.log('Tick:', msg)
+        }
+        pusher.trigger('ticker', 'tick', msg)
 	})
 })
 
 ws.on('error', console.log)
-
 /* 
     websocket for chatroom
 */
-
 const pusher = new Pusher({
     appId: app_id,
     key: key,
@@ -50,10 +47,15 @@ const pusher = new Pusher({
 
 app.post('/message', (req, res) => {
     const payload = req.body;
-    console.log('hello')
+    console.log(payload)
     pusher.trigger('chat', 'message', payload);
     res.send(payload)
 });
+
+app.post('/rooms', (req, res) => {
+    const payload = req.body;
+    console.log(payload)
+})
 
 app.listen(app.get('PORT'), () => 
   console.log('Listening at ' + app.get('PORT')))
