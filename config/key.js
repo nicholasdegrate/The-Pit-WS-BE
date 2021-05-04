@@ -7,4 +7,5 @@ module.exports = {
   secret: process.env.SECRET,
   cluster: process.env.CLUSTER,
   forex_api: process.env.FOREX_API_KEY,
+  db: process.env.DB
 };
