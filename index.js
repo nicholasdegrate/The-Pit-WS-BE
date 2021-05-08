@@ -64,31 +64,41 @@ ws.on('open', () => {
     ws.send(`{"action":"subscribe", "params":"CA.USD/EUR"}`)
 })
 // Per message packet:
+// setInterval(() => {
 ws.on('message', (data) => {
     data = JSON.parse(data)
     data.map((msg) => {
         if (msg.ev === 'status') {
             return console.log('Status Update:', msg.message)
         }
-        const storedForex = new Forex({
-            ev: msg.ev,
-            pair: msg.pair,
-            o: msg.o,
-            c: msg.c,
-            h: msg.h,
-            l: msg.l,
-            s: msg.v,
-            e: msg.e,
-        })
-        storedForex.save().then(() => {
-            console.log('Success')
-        }).catch(err => {
-            if (err) return console.error(err)
-        })
+        if (msg.ev === 'CA') {
+            const storedForex = new Forex({
+                ev: msg.ev,
+                pair: msg.pair,
+                o: msg.o,
+                c: msg.c,
+                h: msg.h,
+                l: msg.l,
+                s: msg.v,
+                e: msg.e,
+            })
+            storedForex.save().then((forex) => {
+                console.log('Success')
+                console.log(forex)
+                pusher.trigger('forex', 'pair', forex)
+            }).catch(err => {
+                if (err) return console.error(err)
+            })
+
+
+        } else if (msg.ev == 'C') {
+            pusher.trigger('ticker', 'tick', msg)
+        }
     })
 })
 
 ws.on('error', console.log)
+// }, 5000)
 
 /* 
     request data
@@ -98,33 +108,32 @@ app.get('/forex', (_, res) => {
         (err) ? console.error(err): res.json(forex)
     })
 })
-
 /* 
     websocket for chatroom
 */
 
-let rooms = {};
-let chatLogs = {};
+// let rooms = {};
+// let chatLogs = {};
 
 
-app.post('/rooms', (req, res, next) => {
-    const data = req.body;
-    const payload = JSON.parse(JSON.stringify(data))
+// app.post('/rooms', (req, res, next) => {
+//     const data = req.body;
+//     const payload = JSON.parse(JSON.stringify(data))
 
-    rooms[payload.user_DMs_id] = payload;
-    chatLogs[payload.user_DMs_id] = []
-})
-app.get('/rooms/:id', (req, res, next) => {
+//     rooms[payload.user_DMs_id] = payload;
+//     chatLogs[payload.user_DMs_id] = []
+// })
+// app.get('/rooms/:id', (req, res, next) => {
 
-    res.json(rooms)
-})
+//     res.json(rooms)
+// })
 
-app.post('/message', (req, res) => {
-    const payload = req.body;
-    console.log(payload)
-    pusher.trigger('chat', 'message', payload);
-    res.send(payload)
-});
+// app.post('/message', (req, res) => {
+//     const payload = req.body;
+//     console.log(payload)
+//     pusher.trigger('chat', 'message', payload);
+//     res.send(payload)
+// });
 
 app.listen(app.get('PORT'), () =>
     console.log('Listening at ' + app.get('PORT')))
