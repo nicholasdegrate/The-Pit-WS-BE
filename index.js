@@ -61,7 +61,7 @@ const ws = new WebSocket('wss://socket.polygon.io/forex')
 ws.on('open', () => {
     console.log('Connected!')
     ws.send(`{"action":"auth","params":"${forex_api}"}`)
-    ws.send(`{"action":"subscribe", "params":"CA.USD/EUR"}`)
+    ws.send(`{"action":"subscribe", "params":"CA.EUR/JPY"}`)
 })
 // Per message packet:
 // setInterval(() => {
@@ -111,29 +111,11 @@ app.get('/forex', (_, res) => {
 /* 
     websocket for chatroom
 */
-
-// let rooms = {};
-// let chatLogs = {};
-
-
-// app.post('/rooms', (req, res, next) => {
-//     const data = req.body;
-//     const payload = JSON.parse(JSON.stringify(data))
-
-//     rooms[payload.user_DMs_id] = payload;
-//     chatLogs[payload.user_DMs_id] = []
-// })
-// app.get('/rooms/:id', (req, res, next) => {
-
-//     res.json(rooms)
-// })
-
-// app.post('/message', (req, res) => {
-//     const payload = req.body;
-//     console.log(payload)
-//     pusher.trigger('chat', 'message', payload);
-//     res.send(payload)
-// });
+app.post('/message', (req, res) => {
+    const payload = req.body;
+    pusher.trigger('chat', 'message', payload);
+    res.send(payload)
+});
 
 app.listen(app.get('PORT'), () =>
     console.log('Listening at ' + app.get('PORT')))
